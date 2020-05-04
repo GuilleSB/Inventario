@@ -1,0 +1,48 @@
+html,body{
+    height: 100%;
+}
+body{
+    display:flex;
+    flex-direction: column;
+}
+
+#frmLogin {
+    margin-top:40px;
+}
+
+
+.content{
+    margin : 60px 0;
+    flex: 1 0 auto;
+}
+
+.subtitulo{
+    margin-bottom: 20px;
+}
+
+footer{
+    flex-shrink: 0;
+}
+
+.sub-principal{
+    text-align: center;
+}
+
+.sub-secundario{
+    text-align: center;
+}
+
+.p-principal{
+    text-align: center;
+}
+
+.div-salida{
+    background-color:#d9534f;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.salida-bodega{
+    color:white;
+}
