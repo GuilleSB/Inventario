@@ -46,3 +46,20 @@ footer{
 .salida-bodega{
     color:white;
 }
+
+td {
+    text-align: center;   
+}
+
+th {
+    text-align: center;
+}
+
+.codigo-barra{
+    color: royalblue;
+    text-decoration: underline;
+}
+
+.codigo-barra:hover{
+    cursor: pointer;
+}

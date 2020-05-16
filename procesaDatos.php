@@ -10,7 +10,6 @@ $Usuario = new Usuario();
 
 $accion = $_POST["accion"];
 $resp = array();
-
 switch ($accion) {
         //Usuarios
     case "login":
@@ -43,6 +42,10 @@ switch ($accion) {
 
     case "consultar-producto":
         $resp = $Producto->ConsultarProductoXTipo($_POST);
+        break;
+
+    case "consultar-xcodigo":
+        $resp = $Producto->ConsultarProductoXCodigo($_POST);
         break;
 
     case "lista-productos":
@@ -78,10 +81,38 @@ switch ($accion) {
             $resp = $Producto->SalidaBodega($_POST["datos"][$i], $IdUsuario);
         }
         break;
-        break;
-
     case "consultar-bodega":
         break;
 }
 
-echo json_encode($resp);
+
+
+/* function convert_from_latin1_to_utf8_recursively($dat)
+{
+   if (is_string($dat)) {
+      return utf8_encode($dat);
+   } elseif (is_array($dat)) {
+      $ret = [];
+      foreach ($dat as $i => $d) $ret[ $i ] =self::convert_from_latin1_to_utf8_recursively($d);
+
+      return $ret;
+   } elseif (is_object($dat)) {
+      foreach ($dat as $i => $d) $dat->$i = self::convert_from_latin1_to_utf8_recursively($d);
+
+      return $dat;
+   } else {
+      return $dat;
+   }
+} */
+// Sample use
+// Just pass your array or string and the UTF8 encode will be fixed
+$data = mb_convert_encoding($resp, 'UTF-8', 'UTF-8');
+
+$json = json_encode($data);
+
+
+if ($json) {
+    echo $json;
+} else {
+    echo json_last_error_msg();
+}

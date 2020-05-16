@@ -55,7 +55,7 @@ class Producto
     {
         require './conexion.php';
         $resp = array();
-        $sql = 'UPDATE producto SET Nombre = "' . $producto["nombre"] . '",Descripcion = "' . $producto["descripcion"] . '" WHERE IdProducto = ' . $producto["idProducto"];
+        $sql = 'UPDATE producto SET Codigo = "' . $producto["codigo"] . '",FechaVencimiento = "' . $producto["vencimiento"] . '" WHERE IdProducto = ' . $producto["idProducto"];
         $mysql->query($sql);
         if ($mysql->affected_rows > 0) {
             $resp["ok"] = true;
@@ -74,7 +74,7 @@ class Producto
         if ($mysql->affected_rows <= 0) {
             $resp["ok"] = false;
             return $resp;
-        }else{
+        } else {
             $resp["ok"] = true;
         }
 
@@ -83,9 +83,9 @@ class Producto
         if ($mysql->affected_rows <= 0) {
             $resp["ok"] = false;
             return $resp;
-        }else{
+        } else {
             $resp["ok"] = true;
-        }        
+        }
         return $resp;
     }
 
@@ -109,17 +109,82 @@ class Producto
         return $resp;
     }
 
-    function ListaProductos()
+    function ConsultarProductoXCodigo($producto)
     {
         require './conexion.php';
         $resp = array();
-        $query = "select IdProducto,tipo_producto.TipoProducto,producto.Nombre, producto.Descripcion, Cantidad, producto.FechaVencimiento from producto, tipo_producto where producto.Tipo = tipo_producto.IdTipo and producto.Cantidad > 0";
+        $query = ""; //Inicializar variable
+        $query = "SELECT * FROM producto WHERE Codigo = " . $producto["codigo"]. " AND Cantidad > 0";
         $resultado = $mysql->query($query);
         if ($resultado->num_rows > 0) {
             $resp["ok"] = true;
             $productos = array();
             while ($producto = $resultado->fetch_assoc()) {
                 array_push($productos, $producto);
+            }
+            $resp["productos"] = $productos;
+        } else {
+            $resp["ok"] = false;
+        }
+        return $resp;
+    }
+
+    /* function ListaProductos()
+    {
+        require './conexion.php';
+        $resp = array();
+        $query = "select tipo_producto.TipoProducto,producto.Nombre, producto.Descripcion, count(*) as 'Cantidad' from producto, tipo_producto where producto.Tipo = tipo_producto.IdTipo and producto.Cantidad > 0 group by tipo_producto.TipoProducto,producto.Nombre,producto.Descripcion order by tipo_producto.TipoProducto, producto.Nombre,producto.Descripcion;";
+        $resultado = $mysql->query($query);
+        if ($resultado->num_rows > 0) {
+            $resp["ok"] = true;
+            $productos = array();
+            while ($producto = $resultado->fetch_assoc()) {
+                array_push($productos, $producto);
+            }
+            $resp["productos"] = $productos;
+        } else {
+            $resp["ok"] = false;
+        }
+        return $resp;
+    } */
+
+    function ListaProductos()
+    {
+        require './conexion.php';
+        $resp = array();
+        $query = "select tipo_producto.TipoProducto,producto.Nombre, producto.Descripcion, count(*) as 'Cantidad' from producto, tipo_producto where producto.Tipo = tipo_producto.IdTipo and producto.Cantidad > 0 group by tipo_producto.TipoProducto,producto.Nombre,producto.Descripcion order by tipo_producto.TipoProducto, producto.Nombre,producto.Descripcion;";
+        $resultado = $mysql->query($query);
+        if ($resultado->num_rows > 0) {
+            $resp["ok"] = true;
+            $productos = array();
+            while ($producto = $resultado->fetch_assoc()) {
+                array_push($productos, $producto);
+            }
+            for ($i = 0; $i < count($productos); $i++) {
+                
+                #Ignora comilla simple para poder realizar query
+                $tipo = str_replace("'","\'",$productos[$i]["TipoProducto"]); 
+                $nombre = str_replace("'","\'",$productos[$i]["Nombre"]);
+                $descripcion = str_replace("'","\'",$productos[$i]["Descripcion"]);
+                #-----------------------------------------------
+
+                $query = "SELECT producto.IdProducto,producto.Codigo, producto.FechaVencimiento " 
+                . "FROM producto, tipo_producto WHERE producto.Tipo = tipo_producto.IdTipo AND tipo_producto.TipoProducto = '" . $tipo . "' AND "
+                . "producto.Nombre = '" . $nombre . "' AND producto.Descripcion = '" . $descripcion . "'  ORDER BY tipo_producto.TipoProducto;";
+                $resultado = $mysql->query($query);
+                if (!$resultado) {
+                    trigger_error('Invalid query: ' . $mysql->error);
+                }
+                if ($resultado->num_rows > 0) {
+                    $productos2 = array();
+                    while ($producto2 = $resultado->fetch_assoc()) {
+                        array_push($productos2, $producto2);
+                    }
+                    $productos[$i]["Asociados"] = true;
+                    $productos[$i]["CodigoVencimiento"] = $productos2;
+                } else {
+                    $productos[$i]["Asociados"] = false;
+                }
             }
             $resp["productos"] = $productos;
         } else {

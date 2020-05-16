@@ -20,25 +20,113 @@
                     <h4 class="salida-bodega">
                         Salida de bodega
                     </h4>
+                    <br>
+                    <form id="buscarProducto">
+                        <input type="text" class="form-control" id="codigo-barras" placeholder="Utilice el lector de código de barras o digite el código del producto a salir" />
+                    </form>
+                    <script>
+                        $(function() {
+                            var prodSalida = [];
+                            $("#codigo-barras").focus();
+
+                            $("#buscarProducto").submit(function(e) {
+                                e.preventDefault();
+                                //Detecta enter
+                                $.ajax({
+                                    type: "post",
+                                    dataType: "json",
+                                    data: {
+                                        "codigo": $("#codigo-barras").val(),
+                                        "accion": "consultar-xcodigo"
+                                    },
+                                    url: "procesaDatos.php",
+                                    success: function(resp) {
+                                        if (resp.ok) {
+                                            var bandera = 0;
+                                            for (var c = 0; c < resp.productos.length; c++) {
+                                                if (prodSalida.length > 0) {
+                                                    for (var i = 0; i < prodSalida.length; i++) {
+                                                        if ($("#codigo-barras").val() == prodSalida[i].Codigo) {
+                                                            bandera = 1;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                if (bandera == 1) {
+                                                    alert("El producto ya está en la lista");
+                                                } else {
+                                                    prodSalida.push({
+                                                        "IdProducto": resp.productos[c].IdProducto,
+                                                        "Codigo": resp.productos[c].Codigo,
+                                                        "Nombre": resp.productos[c].Nombre,
+                                                        "Descripcion": resp.productos[c].Descripcion
+                                                    });
+                                                }
+
+                                            };
+                                        } else {
+                                            alert("El producto #" + $("#codigo-barras").val() + " no existe");
+                                        }
+                                        RecargarTabla();
+
+                                    }
+                                });
+
+                            });
+
+                            function RecargarTabla() {
+                                $("#prod-salir").empty();
+                                $("#codigo-barras").val("");
+                                for (var c = 0; c < prodSalida.length; c++) {
+                                    $("#prod-salir").append(
+                                        '<tr>' +
+                                        '<td>' + prodSalida[c].Codigo + '</td>' +
+                                        '<td>' + prodSalida[c].Nombre + '</td>' +
+                                        '<td>' + prodSalida[c].Descripcion + '</td>' +
+                                        '<td><button id="btn-quitar-' + prodSalida[c].IdProducto + '" class="btn btn-danger btn-quitar" value="' + prodSalida[c].IdProducto + '">Eliminar</button></td>' +
+                                        '</tr>'
+                                    );
+                                }
+                            };
+                        });
+                    </script>
                 </div>
-                <div class="form-group row slider0">
+
+                <div>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Descripcion</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prod-salir">
+
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <!-- <div class="form-group row slider0">
                     <label for="tipo" class="col-sm-2 col-form-label">Tipo de producto</label>
                     <div class="col-sm-10">
                         <select class="form-control" id="tipo">
                             <option value="">Seleccione una opción...</option>
                             <?php
-                            include './class/TipoProducto.php';
+                            /* include './class/TipoProducto.php';
                             $TipoProducto = new TipoProducto();
                             $tipoProducto = $TipoProducto->ListaTipoProducto();
                             $prod = $tipoProducto["productos"];
                             for ($i = 0; $i < count($prod); $i++) {
                                 echo '<option value="' . $prod[$i]["IdTipo"] . '">' . $prod[$i]["TipoProducto"] . '</option>';
-                            }
+                            } */
                             ?>
                         </select>
                     </div>
-                </div>
-                <script>
+                </div> -->
+                <!-- <script>
                     var productos = [];
                     $(function() {
                         $(".slider1").hide();
@@ -83,9 +171,9 @@
                             });
                         });
                     });
-                </script>
+                </script> -->
 
-                <div class="form-group row slider1">
+                <!-- <div class="form-group row slider1">
                     <label for="tipo" class="col-sm-2 col-form-label">Producto</label>
                     <div class="col-9 col-sm-8">
                         <select class="form-control" id="producto">
@@ -101,9 +189,9 @@
                     <div class="col-auto panel-boton">
                         <input type="button" class="btn btn-primary" value="Agregar a lista preliminar" id="btnIngresoLista" />
                     </div>
-                </div>
-                <script>
-                    $(function() {
+                </div> -->
+                <!-- <script>
+                    /* $(function() {
 
                         var productosABodega = [];
 
@@ -266,11 +354,11 @@
                                 }
                             });
                         });
-                    });
-                </script>
-                <hr>
+                    }); */
+                </script> -->
+                <!-- <hr> -->
                 <!--TABLA PARA VISUALIZAR PRODUCTOS A AGREGAR-->
-                <table class="table table-bordered">
+                <!-- <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th scope="col" style="text-align:center">Producto</th>
@@ -281,12 +369,12 @@
                     <tbody id="ingreso-bodega">
 
                     </tbody>
-                </table>
-                <div class="row justify-content-center">
+                </table> -->
+                <!-- <div class="row justify-content-center">
                     <div class="col-auto slider3">
                         <input type="button" class="btn btn-success" value="Descontar productos" id="btnSalidaBodega" />
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
