@@ -29,17 +29,33 @@ class Producto
 
         require './conexion.php';
         $resp = array();
-        $tipo = explode("-", $producto["tipo"]);
-        $sql = 'INSERT INTO producto (Tipo,Nombre,Descripcion,Cantidad,FechaVencimiento) VALUES(' . $tipo[0] . ',"' . $producto["nombre"] . '","' . $producto["descripcion"] . '",' . $producto["cantidad"] . ',"' . $producto["fechaVencimiento"] . '")';
-        $mysql->query($sql);
+
+
+        $sql1 = "SELECT * FROM producto_maestro WHERE Codigo = " . $producto["codigo"];
+        $id = $mysql->query($sql1);
+        if ($id->num_rows <= 0) {
+            $sql2 = 'INSERT INTO producto_maestro (Codigo,Tipo,Nombre,Descripcion) '
+                . ' VALUES("' . $producto["codigo"] . '",' . $producto["tipo"] . ',"' . $producto["nombre"] . '","' . $producto["descripcion"] . '")';
+            $mysql->query($sql2);
+            $id = $mysql->insert_id;
+            if ($id <= 0) {
+                $resp["ok"] = false;
+                return $resp;
+            }
+        }
+
+        $sql3 = "INSERT INTO producto (Codigo,FechaVencimiento)"
+            . " VALUES('" . $producto["codigo"] . "','" . $producto["fechaVencimiento"] . "')";
+        $mysql->query($sql3);
         $id = $mysql->insert_id;
         if ($id <= 0) {
             $resp["ok"] = false;
             return $resp;
         }
 
+
         $sqlBitacora = 'INSERT INTO historico_producto (IdProducto,TipoMOV,CantidadMOV,UsuarioModifica,FechaModifica) values '
-            . '(' . $id . ',1,' . $producto["cantidad"] . ',' . $IdUsuario . ',DATE_SUB(now(),INTERVAL 6 HOUR))';
+            . '(' . $id . ',1,1,' . $IdUsuario . ',DATE_SUB(now(),INTERVAL 6 HOUR))';
         $mysql->query($sqlBitacora);
         if ($mysql->insert_id > 0) {
             $resp["ok"] = true;
@@ -114,7 +130,7 @@ class Producto
         require './conexion.php';
         $resp = array();
         $query = ""; //Inicializar variable
-        $query = "SELECT * FROM producto WHERE Codigo = " . $producto["codigo"]. " AND Cantidad > 0";
+        $query = "SELECT * FROM producto_maestro WHERE Codigo = " . $producto["codigo"] . "";
         $resultado = $mysql->query($query);
         if ($resultado->num_rows > 0) {
             $resp["ok"] = true;
@@ -161,16 +177,16 @@ class Producto
                 array_push($productos, $producto);
             }
             for ($i = 0; $i < count($productos); $i++) {
-                
+
                 #Ignora comilla simple para poder realizar query
-                $tipo = str_replace("'","\'",$productos[$i]["TipoProducto"]); 
-                $nombre = str_replace("'","\'",$productos[$i]["Nombre"]);
-                $descripcion = str_replace("'","\'",$productos[$i]["Descripcion"]);
+                $tipo = str_replace("'", "\'", $productos[$i]["TipoProducto"]);
+                $nombre = str_replace("'", "\'", $productos[$i]["Nombre"]);
+                $descripcion = str_replace("'", "\'", $productos[$i]["Descripcion"]);
                 #-----------------------------------------------
 
-                $query = "SELECT producto.IdProducto,producto.Codigo, producto.FechaVencimiento " 
-                . "FROM producto, tipo_producto WHERE producto.Tipo = tipo_producto.IdTipo AND tipo_producto.TipoProducto = '" . $tipo . "' AND "
-                . "producto.Nombre = '" . $nombre . "' AND producto.Descripcion = '" . $descripcion . "'  ORDER BY tipo_producto.TipoProducto;";
+                $query = "SELECT producto.IdProducto,producto.Codigo, producto.FechaVencimiento "
+                    . "FROM producto, tipo_producto WHERE producto.Tipo = tipo_producto.IdTipo AND tipo_producto.TipoProducto = '" . $tipo . "' AND "
+                    . "producto.Nombre = '" . $nombre . "' AND producto.Descripcion = '" . $descripcion . "'  ORDER BY tipo_producto.TipoProducto;";
                 $resultado = $mysql->query($query);
                 if (!$resultado) {
                     trigger_error('Invalid query: ' . $mysql->error);
@@ -222,15 +238,14 @@ class Producto
         require './conexion.php';
 
         $resp = array();
-        $sql = 'UPDATE producto SET Cantidad = Cantidad - ' . $producto["cantidad"] .
-            ' WHERE IdProducto = ' . $producto["productos"]["IdProducto"];
+        $sql = 'DELETE FROM producto  WHERE IdProducto = ' . $producto["IdProducto"] . '';
         $mysql->query($sql);
         if ($mysql->affected_rows <= 0) {
             $resp["ok"] = false;
             return $resp;
         }
         $sqlBitacora = 'INSERT INTO historico_producto (IdProducto,TipoMOV,CantidadMOV,UsuarioModifica,FechaModifica) values '
-            . '(' . $producto["productos"]["IdProducto"] . ',0,' . $producto["cantidad"] . ',' . $IdUsuario . ',DATE_SUB(now(),INTERVAL 6 HOUR))';
+            . '(' . $producto["IdProducto"] . ',0,1,' . $IdUsuario . ',DATE_SUB(now(),INTERVAL 6 HOUR))';
         $mysql->query($sqlBitacora);
         if ($mysql->insert_id > 0) {
             $resp["ok"] = true;
@@ -244,11 +259,13 @@ class Producto
     {
         require './conexion.php';
         $resp = array();
-        $query = "SELECT producto.Nombre,producto.Descripcion,TipoMOV,CantidadMOV,concat(usuario.Nombre,' ',usuario.Apellidos) as Responsable,historico_producto.FechaModifica FROM historico_producto,producto,usuario"
+        /* $query = "SELECT producto.Nombre,producto.Descripcion,TipoMOV,CantidadMOV,concat(usuario.Nombre,' ',usuario.Apellidos) as Responsable,historico_producto.FechaModifica FROM historico_producto,producto,usuario"
             . " where "
             . " historico_producto.IdProducto = producto.IdProducto AND "
             . " historico_producto.UsuarioModifica = usuario.IdUsuario"
-            . " order by historico_producto.FechaModifica desc";
+            . " order by historico_producto.FechaModifica desc"; */
+
+            $query = "";
 
         $resultado = $mysql->query($query);
         if ($resultado->num_rows > 0) {

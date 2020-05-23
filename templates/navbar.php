@@ -10,7 +10,7 @@
                     Bodega
                 </a>
                 <div class="dropdown-menu" aria-labelledby="bodega">
-                    <a class="dropdown-item" href="nuevo-producto.php">Ingresar producto(s)</a>
+                    <a class="dropdown-item" href="ingreso-bodega.php">Ingresar producto(s)</a>
                     <a class="dropdown-item" href="salida-bodega.php">Descontar producto(s)</a>
                     <a class="dropdown-item" href="lista-productos.php">Lista de productos</a>
                     <a class="dropdown-item" href="bitacora.php">Bitácora</a>

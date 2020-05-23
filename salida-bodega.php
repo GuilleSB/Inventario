@@ -44,25 +44,12 @@
                                         if (resp.ok) {
                                             var bandera = 0;
                                             for (var c = 0; c < resp.productos.length; c++) {
-                                                if (prodSalida.length > 0) {
-                                                    for (var i = 0; i < prodSalida.length; i++) {
-                                                        if ($("#codigo-barras").val() == prodSalida[i].Codigo) {
-                                                            bandera = 1;
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                                if (bandera == 1) {
-                                                    alert("El producto ya está en la lista");
-                                                } else {
-                                                    prodSalida.push({
-                                                        "IdProducto": resp.productos[c].IdProducto,
-                                                        "Codigo": resp.productos[c].Codigo,
-                                                        "Nombre": resp.productos[c].Nombre,
-                                                        "Descripcion": resp.productos[c].Descripcion
-                                                    });
-                                                }
-
+                                                prodSalida.push({
+                                                    "IdProducto": resp.productos[c].IdProducto,
+                                                    "Codigo": resp.productos[c].Codigo,
+                                                    "Nombre": resp.productos[c].Nombre,
+                                                    "Descripcion": resp.productos[c].Descripcion
+                                                });
                                             };
                                         } else {
                                             alert("El producto #" + $("#codigo-barras").val() + " no existe");
@@ -88,6 +75,29 @@
                                     );
                                 }
                             };
+
+                            $("#btnSalida").click(function() {
+                                if (prodSalida.length > 0) {
+                                    $.ajax({
+                                        type: "post",
+                                        dataType: "json",
+                                        data: {
+                                            "datos": prodSalida,
+                                            "accion": "salida-bodega"
+                                        },
+                                        url: "procesaDatos.php",
+                                        success: function(resp) {
+                                            if (resp.ok) {
+                                                $("#confirmaSalidaBodega").modal("show");
+                                            } else {
+                                                $("#errorSalidaBodega").modal("show");
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    $("#errorSalidaBodega").modal("show");
+                                }
+                            });
                         });
                     </script>
                 </div>
@@ -106,8 +116,9 @@
 
                         </tbody>
                     </table>
+                    <br>
+                    <button class="btn btn-primary" id="btnSalida">Confirmar</button>
                 </div>
-
 
                 <!-- <div class="form-group row slider0">
                     <label for="tipo" class="col-sm-2 col-form-label">Tipo de producto</label>
