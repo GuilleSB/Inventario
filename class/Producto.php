@@ -168,39 +168,14 @@ class Producto
     {
         require './conexion.php';
         $resp = array();
-        $query = "select tipo_producto.TipoProducto,producto.Nombre, producto.Descripcion, count(*) as 'Cantidad' from producto, tipo_producto where producto.Tipo = tipo_producto.IdTipo and producto.Cantidad > 0 group by tipo_producto.TipoProducto,producto.Nombre,producto.Descripcion order by tipo_producto.TipoProducto, producto.Nombre,producto.Descripcion;";
+        $query = "SELECT producto_maestro.Codigo,tipo_producto.TipoProducto as Tipo,producto_maestro.Nombre,producto_maestro.Descripcion,
+        count(producto.IdProducto) as Cantidad FROM producto,producto_maestro,tipo_producto WHERE producto.Codigo = producto_maestro.Codigo AND tipo_producto.IdTipo = producto_maestro.Tipo GROUP by producto_maestro.Codigo HAVING Cantidad > 0";
         $resultado = $mysql->query($query);
         if ($resultado->num_rows > 0) {
             $resp["ok"] = true;
             $productos = array();
             while ($producto = $resultado->fetch_assoc()) {
                 array_push($productos, $producto);
-            }
-            for ($i = 0; $i < count($productos); $i++) {
-
-                #Ignora comilla simple para poder realizar query
-                $tipo = str_replace("'", "\'", $productos[$i]["TipoProducto"]);
-                $nombre = str_replace("'", "\'", $productos[$i]["Nombre"]);
-                $descripcion = str_replace("'", "\'", $productos[$i]["Descripcion"]);
-                #-----------------------------------------------
-
-                $query = "SELECT producto.IdProducto,producto.Codigo, producto.FechaVencimiento "
-                    . "FROM producto, tipo_producto WHERE producto.Tipo = tipo_producto.IdTipo AND tipo_producto.TipoProducto = '" . $tipo . "' AND "
-                    . "producto.Nombre = '" . $nombre . "' AND producto.Descripcion = '" . $descripcion . "'  ORDER BY tipo_producto.TipoProducto;";
-                $resultado = $mysql->query($query);
-                if (!$resultado) {
-                    trigger_error('Invalid query: ' . $mysql->error);
-                }
-                if ($resultado->num_rows > 0) {
-                    $productos2 = array();
-                    while ($producto2 = $resultado->fetch_assoc()) {
-                        array_push($productos2, $producto2);
-                    }
-                    $productos[$i]["Asociados"] = true;
-                    $productos[$i]["CodigoVencimiento"] = $productos2;
-                } else {
-                    $productos[$i]["Asociados"] = false;
-                }
             }
             $resp["productos"] = $productos;
         } else {

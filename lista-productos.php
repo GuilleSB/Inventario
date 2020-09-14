@@ -18,30 +18,46 @@
                 <h4 class="subtitulo">
                     Todos los productos
                 </h4>
-                <div class="table-responsive-md">
-                    <table class="table table-bordered">
-                        <thead class="table-dark">
-                            <tr>
-                                <th style="text-align:center;">Tipo</th>
-                                <th style="text-align:center;">Nombre</th>
-                                <th style="text-align:center;">Descripcion</th>
-                                <th style="text-align:center;">Cantidad</th>
-                                <th style="text-align:center;">Accion</th>
-                            </tr>
-                        </thead>
-                        <tbody class="lista-productos">
+                <table data-toggle="table" 
+  data-pagination="true" data-search="true">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Tipo</th>
+                            <th>Nombre</th>
+                            <th>Descripcion</th>
+                            <th>Cantidad</th>
+                            <th>Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody class="lista-productos">
+                        <?php
+                        include './class/Producto.php';
+                        $Productos = new Producto();
 
-                        </tbody>
-                    </table>
-                </div>
+                        $resp = $Productos->ListaProductos();
 
+                        for ($i = 0; $i < count($resp["productos"]); $i++) {
+                            echo '<tr>';
+                            echo '<td>' . $resp["productos"][$i]["Codigo"] . '</td>';
+                            echo '<td>' . $resp["productos"][$i]["Tipo"] . '</td>';
+                            echo '<td>' . $resp["productos"][$i]["Nombre"] . '</td>';
+                            echo '<td>' . $resp["productos"][$i]["Descripcion"] . '</td>';
+                            echo '<td>' . $resp["productos"][$i]["Cantidad"] . '</td>';
+                            echo '<td><button val="' . $resp["productos"][$i]["Codigo"] . '" class="btn btn-warning">Modificar</button></td>';
+                            echo '</tr>';
+                        }
+
+                        ?>
+                    </tbody>
+                </table>
             </div>
 
 
         </div>
     </div>
 
-
+    <!--CONFIRMAR BORRAR PRODUCTO-->
     <div class="modal fade" id="confirmarBorrarProducto" tabindex="-1" role="dialog" aria-labelledby="confirmarBorrarProductoTitle" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -84,7 +100,7 @@
     </div>
 
 
-    <!--MODAL ERROR-->
+    <!--MODAL ERROR EDITAR PRODUCTO-->
     <div class="modal fade" id="errorEditarProducto" tabindex="-1" role="dialog" aria-labelledby="errorEditarProductoTitle" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -137,7 +153,7 @@
                 </div>
                 <div class="modal-body">
 
-                    <input type="hidden" id="idprod">
+                    <input type="hidden" id="codigoproducto">
                     <div class="form-group">
                         <label for="recipient-name" class="col-form-label">Código</label>
                         <input type="text" class="form-control" id="recipient-name">
@@ -149,7 +165,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" id="btn-modificar"  >Guardar</button>
+                    <button type="button" class="btn btn-primary" id="btn-modificar">Guardar</button>
                 </div>
             </div>
         </div>
